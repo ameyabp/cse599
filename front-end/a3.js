@@ -1,5 +1,5 @@
 var initViewportWidth = Math.round(window.innerWidth * 0.9);
-var initViewportHeight = Math.round(window.innerHeight * 0.9);
+var initViewportHeight = Math.round(window.innerHeight * 0.8);
 
 earth_border = {
     "type": "MultiLineString",
@@ -1193,6 +1193,10 @@ earth_border = {
     ]
 }
 
+var species = ['Unknown', 'Pilot', 'Bottlenose', 'Killer', 'Blue', 'Fin', 'Sperm', 'Humpback', 'Sei', 'Common Minke',
+                "Bryde's", 'Right', 'Gray', "Baird's Beaked", 'Baleen', 'Pygmy Blue', 'Pygmy Right', "Cuvier's Beaked",
+                'Bowhead', 'Beaked (unspecified)', 'Antarctic Minke', "Sei/Bryde's", "Dolphin"];
+
 // consider canvas instead of svg
 var svgMap = d3.select(".kyrix-panel")
                 .attr("width", initViewportWidth)
@@ -1221,6 +1225,37 @@ var path = d3.geoPath().projection(projection);
 var tt = d3.select("body").append("div")   
                 .attr("class", "tooltip")           
                 .style("opacity", 0);
+
+// get radio choices
+var lod = d3.select('input[name="lod"]:checked').node().value;
+d3.selectAll(".lod")
+    .on("change", function() {
+        lod = d3.select('input[name="lod"]:checked').node().value;
+        // console.log("lod: " + lod);
+});
+
+var encoding = d3.select('input[name="encoding"]:checked').node().value;;
+d3.selectAll(".encoding")
+    .on("change", function() {
+        encoding = d3.select('input[name="encoding"]:checked').node().value;
+        // console.log("encoding: " + encoding);
+});
+
+// setup species selection list
+d3.select("#species")
+    .selectAll("option")
+    .data(species)
+    .enter()
+    .append("option")
+    .attr("value", (d) => {return d})
+    .text((d) => {return d});
+
+var species_select = d3.select('#species').property('value');
+d3.select("#species")
+    .on("change", function() {
+        species_select = d3.select('#species').property("value");
+        // console.log("species_selected: " + species_select);
+});
 
 // setup map visualization
 d3.json("/first", {

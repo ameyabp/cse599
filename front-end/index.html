@@ -11,11 +11,31 @@
 
   <body>
         <h1> Population Density of Whales </h1>
-        <div class="writeup">
-            
-        </div>
-        <div class="kyrix-panel">
 
+        <div class="kyrix-panel"></div>
+
+        <div class="control-panel">
+          <div>
+            <h4>Level of Detail to visualize</h4>
+            <input type="radio" name="lod" class="lod" id="ocean" value="ocean" checked>Ocean</input>
+            <input type="radio" name="lod" class="lod" id="area" value="area">Area</input>
+            <input type="radio" name="lod" class="lod" id="grid" value="grid">Grid</input>
+            <input type="radio" name="lod" class="lod" id="raw" value="raw">Raw</input>
+            <input type="radio" name="lod" class="lod" id="heatmap" value="heatmap">Heatmap</input>
+          </div>
+
+          <div>
+            <h4>What to visualize</h4>
+            <input type="radio" name="encoding" class="encoding" id="whale-count" value="whale-count" checked>Whale count</input>
+            <input type="radio" name="encoding" class="encoding" id="time-normalized-whale-count" value="time-normalized-whale-count">Time normalized whale count</input>
+          </div>
+
+          <div>
+            <h4>Whale species</h4>
+            <select id="species">
+              <option value="All" selected="selected">All</option>
+            </select>  
+          </div>
         </div>
 
     </body>
