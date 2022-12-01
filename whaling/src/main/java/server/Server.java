@@ -8,13 +8,17 @@ import java.net.InetSocketAddress;
 import java.io.OutputStream;
 import java.io.IOException;
 
+// import org.apache.spark.graphx;
+import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.Dataset;
+
 public class Server {
     private static HttpServer server;
     private static Connection dbConn;
     private static Object terminationLock = new Object();
     private static boolean terminated;
 
-    public static void main( String[] args ) throws Exception   {
+    public static void main( String[] args ) throws SQLException, IOException, InterruptedException, ClassNotFoundException   {
         // CONNECT POSTGRES DB
         Class.forName("org.postgresql.Driver");
         dbConn = DriverManager.getConnection(
@@ -26,6 +30,18 @@ public class Server {
         System.out.println("Connected to kyrix database successfully");
 
         // CREATE LEVELS OF DETAIL
+        Statement stmt = dbConn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+
+        // String logFile = "/home/ameyap2/Documents/spark-3.3.1-bin-hadoop3/README.md";
+        // SparkSession spark = SparkSession.builder().appName("SimpleApp").master("local[*]").getOrCreate();
+        // Dataset<String> logData = spark.read().textFile(logFile).cache();
+
+        // long numAs = logData.filter((org.apache.spark.api.java.function.FilterFunction<String>)s -> s.contains("a")).count();
+        // long numBs = logData.filter((org.apache.spark.api.java.function.FilterFunction<String>)s -> s.contains("b")).count();
+
+        // System.out.println("Lines with a: " + numAs + ", lines with b: " + numBs);
+
+        // spark.stop();
 
         // START SERVER
         server = HttpServer.create(new InetSocketAddress(8000), 0);

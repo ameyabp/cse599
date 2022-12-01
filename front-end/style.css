@@ -15,18 +15,14 @@ h1 {
 .kyrix-panel {
   margin: auto;
   /* top:40%; */
-  width: 1980;
-  height: 1080;
   font-size: 12px;
-  background-color: #d6ffff;
+  /* background-color: #cbee9f; */
 }
 
 #map {
+    position: relative;
+    display: block;
     margin: auto;
-}
-
-#map .title{
-    font-weight: bold;
 }
 
 input[type="radio"]{
