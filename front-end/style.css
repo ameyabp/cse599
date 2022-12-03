@@ -4,9 +4,9 @@ h1 {
 
 .kyrix-panel {
   margin: auto;
-  /* top:40%; */
+  /* display: grid; */
   font-size: 12px;
-  /* background-color: #cbee9f; */
+  /* grid-template-columns: 2.6fr 0.2fr 0.2fr; */
 }
 
 #map {

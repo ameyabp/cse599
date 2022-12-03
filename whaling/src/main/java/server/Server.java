@@ -9,8 +9,8 @@ import java.io.OutputStream;
 import java.io.IOException;
 
 // import org.apache.spark.graphx;
-import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.Dataset;
+// import org.apache.spark.sql.SparkSession;
+// import org.apache.spark.sql.Dataset;
 
 public class Server {
     private static HttpServer server;
@@ -47,6 +47,7 @@ public class Server {
         server = HttpServer.create(new InetSocketAddress(8000), 0);
         server.createContext("/", new IndexHandler());
         server.createContext("/first", new FirstRequestHandler());
+        server.createContext("/data", new DataRequestHandler(dbConn));
         server.start();
         System.out.println("Backend server started at http://localhost:8000");
         terminated = false;

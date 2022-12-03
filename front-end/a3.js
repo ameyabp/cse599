@@ -1194,8 +1194,8 @@ earth_border = {
 }
 
 var species = ['Unknown', 'Pilot', 'Bottlenose', 'Killer', 'Blue', 'Fin', 'Sperm', 'Humpback', 'Sei', 'Common Minke',
-                "Bryde's", 'Right', 'Gray', "Baird's Beaked", 'Baleen', 'Pygmy Blue', 'Pygmy Right', "Cuvier's Beaked",
-                'Bowhead', 'Beaked (unspecified)', 'Antarctic Minke', "Sei/Bryde's", "Dolphin"];
+                "Bryde''s", 'Right', 'Gray', "Baird's Beaked", 'Baleen', 'Pygmy Blue', 'Pygmy Right', "Cuvier''s Beaked",
+                'Bowhead', 'Beaked (unspecified)', 'Antarctic Minke', "Sei/Bryde''s", "Dolphin"];
 
 var svgMap = d3.select(".kyrix-panel")
                 .attr("width", initViewportWidth)
@@ -1243,6 +1243,7 @@ d3.selectAll(".lod")
     .on("change", function() {
         lod = d3.select('input[name="lod"]:checked').node().value;
         // console.log("lod: " + lod);
+        fetchAndRenderData();
 });
 
 var encoding = d3.select('input[name="encoding"]:checked').node().value;;
@@ -1250,6 +1251,7 @@ d3.selectAll(".encoding")
     .on("change", function() {
         encoding = d3.select('input[name="encoding"]:checked').node().value;
         // console.log("encoding: " + encoding);
+        fetchAndRenderData();
 });
 
 // setup species selection list
@@ -1266,93 +1268,234 @@ d3.select("#species")
     .on("change", function() {
         species_select = d3.select('#species').property("value");
         // console.log("species_selected: " + species_select);
+        fetchAndRenderData();
 });
+
+var size_range = [4,900];
 
 function setupSvgMap() {
     // setup map visualization
-    d3.json("/first", {
+    d3.json("./countries-110m.json")
+    .then(function(world_map) {
+
+        svgMap.append("g")
+            .attr("class", "earth-borders")
+            .selectAll("path")
+            .data([earth_border])
+            .enter()
+            .append("path")
+            .attr("d", path)
+            .attr("stroke", "black")
+            .attr("stroke-witdth", 0.5)
+            .style("fill", "#d6ffff");
+
+        svgMap.append("g")
+            .attr("class", "countries")
+            .selectAll("path")
+            .data(topojson.feature(world_map, world_map.objects.countries).features)
+            .enter()
+            .append("path")
+            .attr("d", path)
+            .attr("fill", "white")
+            .attr("stroke", "black")
+            .attr("stroke-width", 0.5)
+            .on("mouseover", function(event, d) {
+                d3.select(this)
+                .transition().duration(200)
+                .style("fill", "rgba(107, 194, 81, 0.5)");
+                
+                tt.html(d.properties.name)
+                .style("left", event.clientX + 15 + "px")     
+                .style("top", event.clientY + 15 + "px");
+
+                tt.transition()        
+                .duration(200)      
+                .style("opacity", 1)
+                .style("width", "120px")
+                .style("height", "60px");
+            
+            })
+            .on("mousemove", function(event, d) {   
+                tt.html(d.properties.name)
+                .style("left", event.clientX + 15 + "px")     
+                .style("top", event.clientY + 15 + "px"); 
+            })
+            .on("mouseout", function() {
+                d3.select(this)
+                .transition().duration(200)
+                .style("fill", "white");
+                
+                tt.transition()        
+                .duration(200)      
+                .style("opacity", 0); 
+            });
+
+        svgMap.append("g")
+            .attr("class", "graticule")
+            .selectAll("path")
+            .data([d3.geoGraticule10()])
+            .enter()
+            .append("path")
+            .attr("d", path)
+            .attr("stroke", "black")
+            .attr("stroke-width", 0.1)
+            .style("fill", "None");
+    })
+
+    fetchAndRenderData();
+}
+
+function changeTooltipContentAndPosition(event, d) {
+    var yrs = Math.floor(d.time_spent/365);
+    var mns = Math.floor((d.time_spent % 365)/30);
+    var days = (d.time_spent % 365) % 30;
+
+    tt.html(function() {
+        switch (lod) {
+            case "ocean":
+                switch (encoding) {
+                    case "whale-count":
+                        return d.ocean + "<br />" + "Number of whales: " + d3.format(",")(Number(d.count)) + "<br />" + "Time spent: " + yrs + "Y " + mns + "M " + days + "D";
+                    case "time-normalized-whale-count":
+                        return d.ocean + "<br />" + "Whales per day: " + d3.format(",.2f")(Number(d.count)/Number(d.time_spent));
+                }
+            case "area":
+                switch (encoding) {
+                    case "whale-count":
+                        return d.area + "<br />" + "Number of whales: " + d3.format(",")(Number(d.count)) + "<br />" + "Time spent: " + yrs + "Y " + mns + "M " + days + "D";
+                    case "time-normalized-whale-count":
+                        return d.area + "<br />" + "Whales per day: " + d3.format(",.2f")(Number(d.count)/Number(d.time_spent));
+                }
+            case "grid":
+            case "raw":
+            case "heatmap":
+                switch (encoding) {
+                    case "whale-count":
+                        return "(lon, lat): (" + d.lon + "," + d.lat + ")<br />" + "Number of whales: " + d3.format(",")(Number(d.count)) + "<br />" + "Time spent: " + yrs + "Y " + mns + "M " + days + "D";
+                    case "time-normalized-whale-count":
+                        return "(lon, lat): (" + d.lon + "," + d.lat + ")<br />" + "Whales per day: " + d3.format(",.2f")(Number(d.count)/Number(d.time_spent));
+                }
+        }
+    })
+    .style("left", event.clientX + 15 + "px")     
+    .style("top", event.clientY + 15 + "px"); 
+}
+
+function clearOldElements() {
+    d3.select("g.ocean-data").remove();
+    d3.select("g.area-data").remove();
+    d3.select("g.grid-data").remove();
+    d3.select("g.raw-data").remove();
+    d3.select("g.heatmap-data").remove();
+    d3.select("div.legend").remove();
+}
+
+function addLegend() {
+
+}
+
+function fetchAndRenderData() {
+    d3.json("/data", {
         method: "POST",
         body: JSON.stringify({
-            top_left_x: 0,
-            top_left_y: 0,
-            top_right_x: 0,
-            top_right_y: 0,
-            bottom_right_x: 0,
-            bottom_right_y: 0,
-            bottom_left_x: 0,
-            bottom_left_y: 0,
+            lod: lod,
+            encoding: encoding,
+            species: species_select
         }),
         headers: {
             "Content-type": "application/json; charset=UTF-8"
         }
     })
     .then(function(data) {
-        d3.json("./countries-110m.json")
-        .then(function(world_map) {
-
-            svgMap.append("g")
-                .attr("class", "earth-borders")
-                .selectAll("path")
-                .data([earth_border])
-                .enter()
-                .append("path")
-                .attr("d", path)
-                .attr("stroke", "black")
-                .attr("stroke-witdth", 0.5)
-                .style("fill", "#d6ffff");
-
-            svgMap.append("g")
-                .attr("class", "countries")
-                .selectAll("path")
-                .data(topojson.feature(world_map, world_map.objects.countries).features)
-                .enter()
-                .append("path")
-                .attr("d", path)
-                .attr("fill", "white")
-                .attr("stroke", "black")
-                .attr("stroke-width", 0.5)
-                .on("mouseover", function(event, d) {
-                    d3.select(this)
-                    .transition().duration(200)
-                    .style("fill", "rgba(107, 194, 81, 0.5)");
-                    
-                    tt.transition()        
-                    .duration(200)      
-                    .style("opacity", 1)
-                    .style("width", "120px")
-                    .style("height", "60px");
-                
-                    tt.html(d.properties.name)
-                    .style("left", event.clientX + 15 + "px")     
-                    .style("top", event.clientY + 15 + "px"); 
-                })
-                .on("mousemove", function(event, d) {   
-                    tt.html(d.properties.name)
-                    .style("left", event.clientX + 15 + "px")     
-                    .style("top", event.clientY + 15 + "px"); 
-                })
-                .on("mouseout", function() {
-                    d3.select(this)
-                    .transition().duration(200)
-                    .style("fill", "white");
-                    
-                    tt.transition()        
-                    .duration(200)      
-                    .style("opacity", 0); 
-                });
-
-            svgMap.append("g")
-                .attr("class", "graticule")
-                .selectAll("path")
-                .data([d3.geoGraticule10()])
-                .enter()
-                .append("path")
-                .attr("d", path)
-                .attr("stroke", "black")
-                .attr("stroke-width", 0.1)
-                .style("fill", "None");
-        })
+        renderData(data);
     });
+}
+
+function renderData(data=null) {
+    clearOldElements();
+
+    var size_scale, color_scale;
+    size_scale = d3.scaleLinear()
+                    .domain([0, d3.max(data, function(d) {
+                        switch (encoding) {
+                            case "whale-count": return Number(d.count);
+                            case "time-normalized-whale-count": return Number(d.count)/Number(d.time_spent);
+                        }
+                    })])
+                    .range(size_range);
+
+    color_scale = d3.scaleSequential(d3.interpolateYlOrRd)
+                    .domain(d3.extent(data, function(d) {
+                        switch (encoding) {
+                            case "whale-count": return Number(d.count);
+                            case "time-normalized-whale-count": return Number(d.count)/Number(d.time_spent);
+                        }
+                    }));
+
+    svgMap.append("g")
+            .attr("class", function() {
+                switch (lod) {
+                    case "ocean":    return "ocean-data";
+                    case "area":    return "area-data";
+                    case "grid":    return "grid-data";
+                    case "raw":    return "raw-data";
+                    case "heatmap":    return "heatmap-data";
+                }
+            })
+            .selectAll("circle")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d) {
+                return projection([Number(d.lon), Number(d.lat)])[0];
+            })
+            .attr("cy", function(d) {
+                return projection([Number(d.lon), Number(d.lat)])[1];
+            })
+            .attr("r", function(d) {
+                switch (encoding) {
+                    case "whale-count": return Math.sqrt(size_scale(Number(d.count)));
+                    case "time-normalized-whale-count": return Math.sqrt(size_scale(Number(d.count)/Number(d.time_spent)));
+                }
+            })
+            .style("fill", function(d) {
+                switch (encoding) {
+                    case "whale-count":    return color_scale(Number(d.count));
+                    case "time-normalized-whale-count": return color_scale(Number(d.count)/Number(d.time_spent));
+                }
+            })
+            .style("opacity", 0.8)
+            .style("stroke-width", 1)
+            .style("stroke", "black")
+            .on("mouseover", function(event, d) {
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .style("stroke-width", 4);
+
+                changeTooltipContentAndPosition(event, d);
+
+                tt.transition()
+                    .duration(200)
+                    .style("opacity", 1)
+                    .style("width", "200px")
+                    .style("height", "100px");
+            })
+            .on("mousemove", function(event, d) {
+                changeTooltipContentAndPosition(event, d);
+            })
+            .on("mouseout", function(event, d) {
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .style("stroke-width", 1);
+
+                tt.transition()
+                    .duration(200)
+                    .style("opacity", 0);
+            });
+
+    addLegend();
 }
 
 setupSvgMap();

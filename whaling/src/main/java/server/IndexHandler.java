@@ -58,7 +58,7 @@ public class IndexHandler implements HttpHandler {
         } 
         catch (Exception e) {
             e.printStackTrace();
-            System.out.println("\n\n" + e.getMessage() + "\n");
+            System.out.println(e.getMessage());
             Server.sendResponse(httpExchange, HttpsURLConnection.HTTP_NO_CONTENT, "");
         }
     }
