@@ -1388,7 +1388,7 @@ function clearOldElements() {
     d3.select("div.size-legend").remove();
 }
 
-function addColorLegend(color_scale) {
+function addColorLegend(color_scale, significant_digits) {
     var color_legend_canvas = d3.select(".kyrix-panel")
                                 .append("div")
                                 .attr("class", "color-legend")
@@ -1429,13 +1429,16 @@ function addColorLegend(color_scale) {
     for (let i=0; i<=numTicks; i++) {
         ctx.moveTo(Math.round(canvas_width * 0.42), Math.round(canvas_height * 0.1) + i/numTicks * ramp_height);
         ctx.lineTo(Math.round(canvas_width * 0.45), Math.round(canvas_height * 0.1) + i/numTicks * ramp_height);
+
         var label = d3.format(",.0f")(i * (domain[1] - domain[0])/numTicks + domain[0]);
+        if (significant_digits > 0)
+            label = d3.format(",." + (significant_digits+1) + "f")(i * (domain[1] - domain[0])/numTicks + domain[0]);
         ctx.fillText(label, Math.round(canvas_width * 0.5), Math.round(canvas_height * 0.1) + (numTicks - i)/numTicks * ramp_height, Math.round(canvas_width * 0.5));
         ctx.stroke();
     }
 }
 
-function addSizeLegend(size_scale) {
+function addSizeLegend(size_scale, significant_digits) {
     // size legend
     var size_legend_canvas = d3.select(".kyrix-panel")
                                 .append("div")
@@ -1470,6 +1473,8 @@ function addSizeLegend(size_scale) {
 
     for (let i=0; i<=numTicks; i++) {
         var label = d3.format(",.0f")(i * (domain[1] - domain[0])/numTicks + domain[0]);
+        if (significant_digits > 0)
+            label = d3.format(",." + (significant_digits+1) + "f")(i * (domain[1] - domain[0])/numTicks + domain[0]);
         ctx.fillText(label, Math.round(canvas_width) * 0.6, Math.round(canvas_height) * 0.1 + (numTicks - i)/numTicks * ramp_height, Math.round(canvas_width * 0.5));
         ctx.stroke();
     }
@@ -1496,88 +1501,138 @@ function renderData(data=null) {
     clearOldElements();
 
     var size_scale, color_scale;
-    size_scale = d3.scaleLinear()
-                    .domain([0, d3.max(data, function(d) {
-                        switch (encoding) {
-                            case "whale-count": return Number(d.count);
-                            case "time-normalized-whale-count": return Number(d.count)/Number(d.time_spent);
-                        }
-                    })])
-                    .range(size_range);
 
-    color_scale = d3.scaleSequential(d3.interpolateYlOrRd)
-                    .domain(d3.extent(data, function(d) {
-                        switch (encoding) {
-                            case "whale-count": return Number(d.count);
-                            case "time-normalized-whale-count": return Number(d.count)/Number(d.time_spent);
-                        }
-                    }));
+    if (lod === "heatmap") {
+        const width = d3.select(".kyrix-panel").node().getBoundingClientRect().width;
+        const height = d3.select(".kyrix-panel").node().getBoundingClientRect().height;
+        const densityData = d3.contourDensity()
+                                .x(function(d) {
+                                    return projection([Number(d.lon), Number(d.lat)])[0];
+                                })
+                                .y(function(d) {
+                                    return projection([Number(d.lon), Number(d.lat)])[1];
+                                })
+                                .size([width, height])
+                                .bandwidth(10)
+                                (data)
 
-    svgMap.append("g")
-            .attr("class", function() {
-                switch (lod) {
-                    case "ocean":    return "ocean-data";
-                    case "area":    return "area-data";
-                    case "grid":    return "grid-data";
-                    case "raw":    return "raw-data";
-                    case "heatmap":    return "heatmap-data";
-                }
-            })
-            .selectAll("circle")
-            .data(data)
-            .enter()
-            .append("circle")
-            .attr("cx", function(d) {
-                return projection([Number(d.lon), Number(d.lat)])[0];
-            })
-            .attr("cy", function(d) {
-                return projection([Number(d.lon), Number(d.lat)])[1];
-            })
-            .attr("r", function(d) {
-                switch (encoding) {
-                    case "whale-count": return Math.sqrt(size_scale(Number(d.count)));
-                    case "time-normalized-whale-count": return Math.sqrt(size_scale(Number(d.count)/Number(d.time_spent)));
-                }
-            })
-            .style("fill", function(d) {
-                switch (encoding) {
-                    case "whale-count":    return color_scale(Number(d.count));
-                    case "time-normalized-whale-count": return color_scale(Number(d.count)/Number(d.time_spent));
-                }
-            })
-            .style("opacity", 0.8)
-            .style("stroke-width", 1)
-            .style("stroke", "black")
-            .on("mouseover", function(event, d) {
-                d3.select(this)
-                    .transition()
-                    .duration(200)
-                    .style("stroke-width", 4);
+        color_scale = d3.scaleSequential(d3.interpolateYlOrRd)
+                        .domain(d3.extent(densityData, function(d) {
+                            return d.value;
+                        }));
 
-                changeTooltipContentAndPosition(event, d);
+        svgMap.append("g")
+                .attr("class", "heatmap-data")
+                .insert("g", "g")
+                .selectAll("path")
+                .data(densityData)
+                .enter()
+                .append("path")
+                .attr("d", d3.geoPath())
+                .attr("fill", function(d) {
+                    return color_scale(d.value); 
+                });
+        
+        if (color_scale.domain()[1] < 1)
+            significant_digits = Math.ceil(-Math.log10(color_scale.domain()[1]));
+        else
+            significant_digits = 0;
 
-                tt.transition()
-                    .duration(200)
-                    .style("opacity", 1)
-                    .style("width", "200px")
-                    .style("height", "100px");
-            })
-            .on("mousemove", function(event, d) {
-                changeTooltipContentAndPosition(event, d);
-            })
-            .on("mouseout", function(event, d) {
-                d3.select(this)
-                    .transition()
-                    .duration(200)
-                    .style("stroke-width", 1);
+        addColorLegend(color_scale, significant_digits);
+    }
+    else {
+        size_scale = d3.scaleLinear()
+                        .domain([0, d3.max(data, function(d) {
+                            switch (encoding) {
+                                case "whale-count": return Number(d.count);
+                                case "time-normalized-whale-count": return Number(d.count)/Number(d.time_spent);
+                            }
+                        })])
+                        .range(size_range);
+    
+        color_scale = d3.scaleSequential(d3.interpolateYlOrRd)
+                        .domain(d3.extent(data, function(d) {
+                            switch (encoding) {
+                                case "whale-count": return Number(d.count);
+                                case "time-normalized-whale-count": return Number(d.count)/Number(d.time_spent);
+                            }
+                        }));
 
-                tt.transition()
-                    .duration(200)
-                    .style("opacity", 0);
-            });
+        svgMap.append("g")
+                .attr("class", function() {
+                    switch (lod) {
+                        case "ocean":    return "ocean-data";
+                        case "area":    return "area-data";
+                        case "grid":    return "grid-data";
+                        case "raw":    return "raw-data";
+                    }
+                })
+                .selectAll("circle")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("cx", function(d) {
+                    return projection([Number(d.lon), Number(d.lat)])[0];
+                })
+                .attr("cy", function(d) {
+                    return projection([Number(d.lon), Number(d.lat)])[1];
+                })
+                .attr("r", function(d) {
+                    switch (encoding) {
+                        case "whale-count": return Math.sqrt(size_scale(Number(d.count)));
+                        case "time-normalized-whale-count": return Math.sqrt(size_scale(Number(d.count)/Number(d.time_spent)));
+                    }
+                })
+                .style("fill", function(d) {
+                    switch (encoding) {
+                        case "whale-count":    return color_scale(Number(d.count));
+                        case "time-normalized-whale-count": return color_scale(Number(d.count)/Number(d.time_spent));
+                    }
+                })
+                .style("opacity", 0.8)
+                .style("stroke-width", 1)
+                .style("stroke", "black")
+                .on("mouseover", function(event, d) {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .style("stroke-width", 4);
 
-    addSizeLegend(size_scale);
-    addColorLegend(color_scale);
+                    changeTooltipContentAndPosition(event, d);
+
+                    tt.transition()
+                        .duration(200)
+                        .style("opacity", 1)
+                        .style("width", "200px")
+                        .style("height", "100px");
+                })
+                .on("mousemove", function(event, d) {
+                    changeTooltipContentAndPosition(event, d);
+                })
+                .on("mouseout", function(event, d) {
+                    d3.select(this)
+                        .transition()
+                        .duration(200)
+                        .style("stroke-width", 1);
+
+                    tt.transition()
+                        .duration(200)
+                        .style("opacity", 0);
+                });
+
+        if (size_scale.domain()[1] < 1)
+            significant_digits = Math.ceil(-Math.log10(size_scale.domain()[1]));
+        else
+            significant_digits = 0
+        addSizeLegend(size_scale, significant_digits);
+
+        if (color_scale.domain()[1] < 1)
+            significant_digits = Math.ceil(-Math.log10(color_scale.domain()[1]));
+        else
+            significant_digits = 0;
+            
+        addColorLegend(color_scale, significant_digits);
+    }
 }
 
 setupSvgMap();

@@ -67,13 +67,13 @@ public class DataRequestHandler implements HttpHandler {
                     query += " GROUP BY area ORDER BY count ASC;";
                     break;
                 case "grid":
+                case "heatmap":
                     query = "SELECT COUNT(*) AS count, _lon::INT AS lon, _lat::INT AS lat, MAX(date)-MIN(date)+1 AS time_spent FROM whale_nodes";
                     if (!params.get("species").toString().equals("All"))
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
                     query += " GROUP BY lat, lon ORDER BY count ASC;";
                     break;
                 case "raw":
-                case "heatmap":
                     query = "SELECT COUNT(*) AS count, _lon AS lon, _lat AS lat, MAX(date)-MIN(date)+1 AS time_spent FROM whale_nodes";
                     if (!params.get("species").toString().equals("All"))
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
