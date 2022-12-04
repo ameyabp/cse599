@@ -1198,12 +1198,12 @@ var species = ['Unknown', 'Pilot', 'Bottlenose', 'Killer', 'Blue', 'Fin', 'Sperm
                 'Bowhead', 'Beaked (unspecified)', 'Antarctic Minke', "Sei/Bryde''s", "Dolphin"];
 
 var svgMap = d3.select(".kyrix-panel")
-                .attr("width", initViewportWidth)
-                .attr("height", initViewportHeight)
+                // .attr("width", initViewportWidth)
+                // .attr("height", initViewportHeight)
                 .append("svg")
                 .attr("id", "map")
-                .attr("width", initViewportWidth)
-                .attr("height", initViewportHeight)
+                // .attr("width", "100%")
+                // .attr("height", "100%")
                 .attr("viewBox", [0, 0, initViewportWidth, initViewportHeight])
                 .append("g");
 
@@ -1226,7 +1226,7 @@ function resetViewport() {
 }
 
 var projection = d3.geoNaturalEarth1()
-                .scale(300)
+                .scale(280)
                 .translate([initViewportWidth/2, initViewportHeight/2]);
                 // .rotate([-11,0,0]);   // shift part of Russia from west of the map to the east
 
@@ -1242,7 +1242,6 @@ var lod = d3.select('input[name="lod"]:checked').node().value;
 d3.selectAll(".lod")
     .on("change", function() {
         lod = d3.select('input[name="lod"]:checked').node().value;
-        // console.log("lod: " + lod);
         fetchAndRenderData();
 });
 
@@ -1250,7 +1249,6 @@ var encoding = d3.select('input[name="encoding"]:checked').node().value;;
 d3.selectAll(".encoding")
     .on("change", function() {
         encoding = d3.select('input[name="encoding"]:checked').node().value;
-        // console.log("encoding: " + encoding);
         fetchAndRenderData();
 });
 
@@ -1267,7 +1265,6 @@ var species_select = d3.select('#species').property('value');
 d3.select("#species")
     .on("change", function() {
         species_select = d3.select('#species').property("value");
-        // console.log("species_selected: " + species_select);
         fetchAndRenderData();
 });
 
@@ -1387,11 +1384,95 @@ function clearOldElements() {
     d3.select("g.grid-data").remove();
     d3.select("g.raw-data").remove();
     d3.select("g.heatmap-data").remove();
-    d3.select("div.legend").remove();
+    d3.select("div.color-legend").remove();
+    d3.select("div.size-legend").remove();
 }
 
-function addLegend() {
+function addColorLegend(color_scale) {
+    var color_legend_canvas = d3.select(".kyrix-panel")
+                                .append("div")
+                                .attr("class", "color-legend")
+                                .style("position", "relative")
+                                .style("width", "100%")
+                                .style("height", "100%")
+                                .append("canvas")
+                                .style("width", "100%")
+                                .style("height", "100%");
 
+    var ctx = color_legend_canvas.node().getContext('2d');
+    color_legend_canvas.node().width = color_legend_canvas.node().offsetWidth;
+    color_legend_canvas.node().height = color_legend_canvas.node().offsetHeight;
+    var canvas_width = color_legend_canvas.node().width;
+    var canvas_height = color_legend_canvas.node().height;
+
+    color_legend_canvas.style.imageRendering = "-moz-crisp-edges";
+    color_legend_canvas.style.imageRendering = "pixelated";
+    var ramp_height = Math.round(canvas_height * 0.8);
+    for (let i = Math.round(canvas_height * 0.1); i < Math.round(canvas_height * 0.9); ++i) {
+        ctx.fillStyle = d3.interpolateYlOrRd((ramp_height-i) / (ramp_height - 1));
+        ctx.fillRect(Math.round(canvas_width * 0.1), i, Math.round(canvas_width * 0.3), 1);
+    }
+
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(Math.round(canvas_width * 0.42), Math.round(canvas_height * 0.1));
+    ctx.lineTo(Math.round(canvas_width * 0.42), Math.round(canvas_height * 0.9));
+    ctx.stroke();
+
+    ctx.font = "12px Arial";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "left";
+    ctx.lineWidth = 1;
+    var numTicks = 9;
+    var domain = color_scale.domain();
+
+    for (let i=0; i<=numTicks; i++) {
+        ctx.moveTo(Math.round(canvas_width * 0.42), Math.round(canvas_height * 0.1) + i/numTicks * ramp_height);
+        ctx.lineTo(Math.round(canvas_width * 0.45), Math.round(canvas_height * 0.1) + i/numTicks * ramp_height);
+        var label = d3.format(",.0f")(i * (domain[1] - domain[0])/numTicks + domain[0]);
+        ctx.fillText(label, Math.round(canvas_width * 0.5), Math.round(canvas_height * 0.1) + (numTicks - i)/numTicks * ramp_height, Math.round(canvas_width * 0.5));
+        ctx.stroke();
+    }
+}
+
+function addSizeLegend(size_scale) {
+    // size legend
+    var size_legend_canvas = d3.select(".kyrix-panel")
+                                .append("div")
+                                .attr("class", "size-legend")
+                                .style("position", "relative")
+                                .style("width", "100%")
+                                .style("height", "100%")
+                                .append("canvas")
+                                .style("width", "100%")
+                                .style("height", "100%");
+
+    var ctx = size_legend_canvas.node().getContext('2d');
+    size_legend_canvas.node().width = size_legend_canvas.node().offsetWidth;
+    size_legend_canvas.node().height = size_legend_canvas.node().offsetHeight;
+    var canvas_width = size_legend_canvas.node().width;
+    var canvas_height = size_legend_canvas.node().height;
+
+    ctx.lineWidth = 1;
+    var domain = size_scale.domain();
+    var numTicks = 9;
+    var ramp_height = Math.round(canvas_height * 0.8);
+
+    for (let i=0; i<=numTicks; i++) {
+        ctx.beginPath();
+        ctx.arc(Math.round(canvas_width * 0.3), Math.round(canvas_height * 0.1) + (numTicks - i)/numTicks * ramp_height, Math.sqrt(size_scale(domain[0] + i * (domain[1] - domain[0])/numTicks)), 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+
+    ctx.font = "12px Arial";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "left";
+
+    for (let i=0; i<=numTicks; i++) {
+        var label = d3.format(",.0f")(i * (domain[1] - domain[0])/numTicks + domain[0]);
+        ctx.fillText(label, Math.round(canvas_width) * 0.6, Math.round(canvas_height) * 0.1 + (numTicks - i)/numTicks * ramp_height, Math.round(canvas_width * 0.5));
+        ctx.stroke();
+    }
 }
 
 function fetchAndRenderData() {
@@ -1495,7 +1576,8 @@ function renderData(data=null) {
                     .style("opacity", 0);
             });
 
-    addLegend();
+    addSizeLegend(size_scale);
+    addColorLegend(color_scale);
 }
 
 setupSvgMap();
