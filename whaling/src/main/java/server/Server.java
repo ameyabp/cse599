@@ -12,6 +12,10 @@ import java.io.IOException;
 // import org.apache.spark.sql.SparkSession;
 // import org.apache.spark.sql.Dataset;
 
+// import org.apache.spark.api.java.JavaSparkContext;
+// import org.apache.spark.api.java.JavaRDD;
+// import org.apache.spark.SparkConf;
+
 public class Server {
     private static HttpServer server;
     private static Connection dbConn;
@@ -31,6 +35,9 @@ public class Server {
 
         // CREATE LEVELS OF DETAIL
         Statement stmt = dbConn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+
+        // SparkConf conf = new SparkConf().setAppName("kyrix-g").setMaster("local[*]");
+        // JavaSparkContext jc = new JavaSparkContext(conf);
 
         // String logFile = "/home/ameyap2/Documents/spark-3.3.1-bin-hadoop3/README.md";
         // SparkSession spark = SparkSession.builder().appName("SimpleApp").master("local[*]").getOrCreate();

@@ -35,9 +35,14 @@ input[type="radio"]{
 
 .control-panel {
   display: grid;
-  grid-template-columns: 1.5fr 1.2fr 0.8fr 0.5fr;
-  grid-gap: 2%;
   padding-left: 5%;
   padding-top: 2%;
   padding-right: 5%;
+  grid-gap: 5%;
+}
+
+.radio-controls {
+  display: grid;
+  grid-template-columns: 1.5fr 1.2fr 0.8fr 0.5fr;
+  grid-gap: 2%;
 }

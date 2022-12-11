@@ -53,30 +53,70 @@ public class DataRequestHandler implements HttpHandler {
 
             // construct query
             String query = "";
+            Double dbegin = (Double)params.get("begin");
+            Double dend = (Double)params.get("end");
+            int begin = dbegin.intValue();
+            int end = dend.intValue();
             switch (params.get("lod").toString()) {
                 case "ocean":
                     query = "SELECT ocean, COUNT(*) AS count, AVG(_lon) AS lon, AVG(_lat) AS lat, MAX(date)-MIN(date)+1 AS time_spent FROM whale_nodes";
-                    if (!params.get("species").toString().equals("All"))
+                    
+                    if (!params.get("species").toString().equals("All")) {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
+                    
+                        if (begin != 1850 || end != 2020)
+                            query += " AND '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                    }
+                    else if (begin != 1850 || end != 2020) {
+                        query += " WHERE '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                    }
+
                     query += " GROUP BY ocean ORDER BY count ASC;";
                     break;
                 case "area":
                     query = "SELECT area, COUNT(*) AS count, AVG(_lon) AS lon, AVG(_lat) AS lat, MAX(date)-MIN(date)+1 AS time_spent FROM whale_nodes";
-                    if (!params.get("species").toString().equals("All"))
+                    
+                    if (!params.get("species").toString().equals("All")) {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
+                    
+                        if (begin != 1850 || end != 2020)
+                            query += " AND '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                    }
+                    else if (begin != 1850 || end != 2020) {
+                        query += " WHERE '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                    }
+
                     query += " GROUP BY area ORDER BY count ASC;";
                     break;
                 case "grid":
                 case "heatmap":
                     query = "SELECT COUNT(*) AS count, _lon::INT AS lon, _lat::INT AS lat, MAX(date)-MIN(date)+1 AS time_spent FROM whale_nodes";
-                    if (!params.get("species").toString().equals("All"))
+                    
+                    if (!params.get("species").toString().equals("All")) {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
+                    
+                        if (begin != 1850 || end != 2020)
+                            query += " AND '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                    }
+                    else if (begin != 1850 || end != 2020) {
+                        query += " WHERE '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                    }
+                    
                     query += " GROUP BY lat, lon ORDER BY count ASC;";
                     break;
                 case "raw":
                     query = "SELECT COUNT(*) AS count, _lon AS lon, _lat AS lat, MAX(date)-MIN(date)+1 AS time_spent FROM whale_nodes";
-                    if (!params.get("species").toString().equals("All"))
+                    
+                    if (!params.get("species").toString().equals("All")) {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
+                    
+                        if (begin != 1850 || end != 2020)
+                            query += " AND '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                    }
+                    else if (begin != 1850 || end != 2020) {
+                        query += " WHERE '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                    }
+
                     query += " GROUP BY lat, lon ORDER BY count ASC;";
                     break;
             }

@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" type="text/css" />
+    <link href="d3RangeSlider.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
   </head>
 
@@ -15,32 +16,41 @@
         <div class="kyrix-panel"></div>
 
         <div class="control-panel">
-          <div>
-            <h4>Level of Detail to visualize</h4>
-            <input type="radio" name="lod" class="lod" id="ocean" value="ocean" checked>Ocean</input>
-            <input type="radio" name="lod" class="lod" id="area" value="area">Area</input>
-            <input type="radio" name="lod" class="lod" id="grid" value="grid">Grid</input>
-            <input type="radio" name="lod" class="lod" id="raw" value="raw">Raw</input>
-            <input type="radio" name="lod" class="lod" id="heatmap" value="heatmap">Heatmap</input>
+          <div class="slider-control">
+            <h4>Time slider</h4>
+            <div id="slider-text"></div>
+          </div>
+          
+          <div class="radio-controls">
+            <div>
+              <h4>Level of Detail to visualize</h4>
+              <input type="radio" name="lod" class="lod" id="ocean" value="ocean" checked>Ocean</input>
+              <input type="radio" name="lod" class="lod" id="area" value="area">Area</input>
+              <input type="radio" name="lod" class="lod" id="grid" value="grid">Grid</input>
+              <input type="radio" name="lod" class="lod" id="raw" value="raw">Raw</input>
+              <input type="radio" name="lod" class="lod" id="heatmap" value="heatmap">Heatmap</input>
+            </div>
+
+            <div>
+              <h4>What to visualize</h4>
+              <input type="radio" name="encoding" class="encoding" id="whale-count" value="whale-count" checked>Whale count</input>
+              <input type="radio" name="encoding" class="encoding" id="time-normalized-whale-count" value="time-normalized-whale-count">Time normalized whale count</input>
+            </div>
+
+            <div>
+              <h4>Whale species</h4>
+              <select id="species">
+                <option value="All" selected="selected">All</option>
+              </select>  
+            </div>
+
+            <div>
+              <button type="button" onclick="reset()">Reset</button>
+            </div>
           </div>
 
-          <div>
-            <h4>What to visualize</h4>
-            <input type="radio" name="encoding" class="encoding" id="whale-count" value="whale-count" checked>Whale count</input>
-            <input type="radio" name="encoding" class="encoding" id="time-normalized-whale-count" value="time-normalized-whale-count">Time normalized whale count</input>
-          </div>
-
-          <div>
-            <h4>Whale species</h4>
-            <select id="species">
-              <option value="All" selected="selected">All</option>
-            </select>  
-          </div>
-
-          <div>
-            <button type="button" onclick="resetViewport()">Reset viewport</button>
-          </div>
         </div>
+
 
     </body>
 
@@ -49,6 +59,7 @@
         <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.2/js/bootstrap.min.js"></script>
         <script src="https://d3js.org/d3.v6.min.js"></script>
         <script src="https://d3js.org/topojson.v2.min.js"></script>
+        <script src="d3RangeSlider.js"></script>
         <script src="a3.js"></script>
     </head>
 </html>

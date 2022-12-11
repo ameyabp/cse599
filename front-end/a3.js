@@ -1,7 +1,7 @@
-var initViewportWidth = Math.round(window.innerWidth * 0.9);
-var initViewportHeight = Math.round(window.innerHeight * 0.8);
+const initViewportWidth = Math.round(window.innerWidth * 0.9);
+const initViewportHeight = Math.round(window.innerHeight * 0.8);
 
-earth_border = {
+const earth_border = {
     "type": "MultiLineString",
     "coordinates": [
         [
@@ -1193,9 +1193,12 @@ earth_border = {
     ]
 }
 
-var species = ['Unknown', 'Pilot', 'Bottlenose', 'Killer', 'Blue', 'Fin', 'Sperm', 'Humpback', 'Sei', 'Common Minke',
-                "Bryde''s", 'Right', 'Gray', "Baird's Beaked", 'Baleen', 'Pygmy Blue', 'Pygmy Right', "Cuvier''s Beaked",
+const species = ['Unknown', 'Pilot', 'Bottlenose', 'Killer', 'Blue', 'Fin', 'Sperm', 'Humpback', 'Sei', 'Common Minke',
+                "Bryde''s", 'Right', 'Gray', "Baird''s Beaked", 'Baleen', 'Pygmy Blue', 'Pygmy Right', "Cuvier''s Beaked",
                 'Bowhead', 'Beaked (unspecified)', 'Antarctic Minke', "Sei/Bryde''s", "Dolphin"];
+
+const dataTimeRangeBegin = 1850;
+const dataTimeRangeEnd = 2020;
 
 var svgMap = d3.select(".kyrix-panel")
                 // .attr("width", initViewportWidth)
@@ -1218,12 +1221,6 @@ var zoom = d3.zoom()
             .on("zoom", zoomed);
 
 svgMap.call(zoom);
-
-function resetViewport() {
-    svgMap.transition()
-            .duration(500)
-            .call(zoom.transform, d3.zoomIdentity);
-}
 
 var projection = d3.geoNaturalEarth1()
                 .scale(280)
@@ -1267,6 +1264,39 @@ d3.select("#species")
         species_select = d3.select('#species').property("value");
         fetchAndRenderData();
 });
+
+// setup time range slider
+var rangeBegin = dataTimeRangeBegin;
+var rangeEnd = dataTimeRangeEnd;
+var slider = createD3RangeSlider(rangeBegin, rangeEnd, ".slider-control");
+slider.range(rangeBegin, rangeEnd);
+d3.select("#slider-text").text(rangeBegin + " - " + rangeEnd);
+
+slider.onChange(function(newRange) {
+    d3.select("#slider-text").text(newRange.begin + " - " + newRange.end);
+});
+
+slider.onTouchEnd(function(newRange) {
+    if (newRange.begin != rangeBegin || newRange.end != rangeEnd) {
+        rangeBegin = newRange.begin;
+        rangeEnd = newRange.end;
+
+        // call fetchAndRenderData() only when the slider movement has stopped i.e. onTouchEnd
+        fetchAndRenderData();
+    }
+});
+
+function reset() {
+    // reset viewport
+    svgMap.transition()
+            .duration(500)
+            .call(zoom.transform, d3.zoomIdentity);
+
+    // reset time slider to span the entire duration
+    rangeBegin = dataTimeRangeBegin;
+    rangeEnd = dataTimeRangeEnd;
+    slider.range(rangeBegin, rangeEnd);
+}
 
 var size_range = [4,900];
 
@@ -1486,7 +1516,9 @@ function fetchAndRenderData() {
         body: JSON.stringify({
             lod: lod,
             encoding: encoding,
-            species: species_select
+            species: species_select,
+            begin: rangeBegin,
+            end: rangeEnd
         }),
         headers: {
             "Content-type": "application/json; charset=UTF-8"
@@ -1516,7 +1548,12 @@ function renderData(data=null) {
                                 .bandwidth(10)
                                 (data)
 
-        color_scale = d3.scaleSequential(d3.interpolateYlOrRd)
+        // color_scale = d3.scaleSequential(d3.interpolateYlOrRd)
+        //                 .domain(d3.extent(densityData, function(d) {
+        //                     return d.value;
+        //                 }));
+
+        color_scale = d3.scaleSequential(d3.interpolate(d3.color("rgba(255, 255, 0, 0.3)"), d3.color("rgba(255, 0, 0, 0.3)")))
                         .domain(d3.extent(densityData, function(d) {
                             return d.value;
                         }));
@@ -1550,7 +1587,7 @@ function renderData(data=null) {
                         })])
                         .range(size_range);
     
-        color_scale = d3.scaleSequential(d3.interpolateYlOrRd)
+        color_scale = d3.scaleSequential(d3.interpolate(d3.color("rgba(255, 255, 0, 0.8)"), d3.color("rgba(255, 0, 0, 0.8)")))
                         .domain(d3.extent(data, function(d) {
                             switch (encoding) {
                                 case "whale-count": return Number(d.count);
@@ -1589,7 +1626,7 @@ function renderData(data=null) {
                         case "time-normalized-whale-count": return color_scale(Number(d.count)/Number(d.time_spent));
                     }
                 })
-                .style("opacity", 0.8)
+                // .style("opacity", 0.8)
                 .style("stroke-width", 1)
                 .style("stroke", "black")
                 .on("mouseover", function(event, d) {
