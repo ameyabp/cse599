@@ -1197,7 +1197,7 @@ const species = ['Unknown', 'Pilot', 'Bottlenose', 'Killer', 'Blue', 'Fin', 'Spe
                 "Bryde''s", 'Right', 'Gray', "Baird''s Beaked", 'Baleen', 'Pygmy Blue', 'Pygmy Right', "Cuvier''s Beaked",
                 'Bowhead', 'Beaked (unspecified)', 'Antarctic Minke', "Sei/Bryde''s", "Dolphin"];
 
-const dataTimeRangeBegin = 1850;
+const dataTimeRangeBegin = 1880;
 const dataTimeRangeEnd = 2020;
 
 var svgMap = d3.select(".kyrix-panel")
@@ -1382,26 +1382,27 @@ function changeTooltipContentAndPosition(event, d) {
             case "ocean":
                 switch (encoding) {
                     case "whale-count":
-                        return d.ocean + "<br />" + "Number of whales: " + d3.format(",")(Number(d.count)) + "<br />" + "Time spent: " + yrs + "Y " + mns + "M " + days + "D";
+                        return d.ocean + "<br />" + "Number of whales: " + d3.format(",")(Number(d.count)) + "<br />" + "Time spent: " + yrs + "Y " + mns + "M " + days + "D<br /> Max. Nationality: " + d.nationality;
                     case "time-normalized-whale-count":
-                        return d.ocean + "<br />" + "Whales per day: " + d3.format(",.2f")(Number(d.count)/Number(d.time_spent));
+                        return d.ocean + "<br />" + "Whales per day: " + d3.format(",.2f")(Number(d.count)/Number(d.time_spent)) + "<br /> Max. Nationality: " + d.nationality;
                 }
             case "area":
                 switch (encoding) {
                     case "whale-count":
-                        return d.area + "<br />" + "Number of whales: " + d3.format(",")(Number(d.count)) + "<br />" + "Time spent: " + yrs + "Y " + mns + "M " + days + "D";
+                        return d.area + "<br />" + "Number of whales: " + d3.format(",")(Number(d.count)) + "<br />" + "Time spent: " + yrs + "Y " + mns + "M " + days + "D<br /> Max. Nationality: " + d.nationality
                     case "time-normalized-whale-count":
-                        return d.area + "<br />" + "Whales per day: " + d3.format(",.2f")(Number(d.count)/Number(d.time_spent));
+                        return d.area + "<br />" + "Whales per day: " + d3.format(",.2f")(Number(d.count)/Number(d.time_spent)) + "<br /> Max. Nationality: " + d.nationality;
                 }
             case "grid":
             case "raw":
-            case "heatmap":
                 switch (encoding) {
                     case "whale-count":
-                        return "(lon, lat): (" + d.lon + "," + d.lat + ")<br />" + "Number of whales: " + d3.format(",")(Number(d.count)) + "<br />" + "Time spent: " + yrs + "Y " + mns + "M " + days + "D";
+                        return "(lon, lat): (" + d.lon + "," + d.lat + ")<br />" + "Number of whales: " + d3.format(",")(Number(d.count)) + "<br />" + "Time spent: " + yrs + "Y " + mns + "M " + days + "D<br /> Max. Nationality: " + d.nationality
                     case "time-normalized-whale-count":
-                        return "(lon, lat): (" + d.lon + "," + d.lat + ")<br />" + "Whales per day: " + d3.format(",.2f")(Number(d.count)/Number(d.time_spent));
+                        return "(lon, lat): (" + d.lon + "," + d.lat + ")<br />" + "Whales per day: " + d3.format(",.2f")(Number(d.count)/Number(d.time_spent)) + "<br /> Max. Nationality: " + d.nationality;
                 }
+            case "heatmap":
+                break;
         }
     })
     .style("left", event.clientX + 15 + "px")     

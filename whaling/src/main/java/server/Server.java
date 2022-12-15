@@ -35,9 +35,18 @@ public class Server {
 
         // CREATE LEVELS OF DETAIL
         Statement stmt = dbConn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        // System.out.println("Current working directory: " + System.getProperty("user.dir"));
 
+        // long st = System.nanoTime();
         // SparkConf conf = new SparkConf().setAppName("kyrix-g").setMaster("local[*]");
-        // JavaSparkContext jc = new JavaSparkContext(conf);
+        // JavaSparkContext jsc = new JavaSparkContext(conf);
+
+        // JavaRDD<String> lines = jsc.textFile("../data/graphNodesData.csv", 4);
+        // JavaRDD<Integer> counts = lines.map(s -> s.contains("Blue") ? 1 : 0);
+        // int totalBlueWhales = counts.reduce((a, b) -> a+b);
+        // st = System.nanoTime() - st;
+
+        // System.out.println("Number of blue whales: " + totalBlueWhales + " counted in " + st/1e9 + " s");
 
         // String logFile = "/home/ameyap2/Documents/spark-3.3.1-bin-hadoop3/README.md";
         // SparkSession spark = SparkSession.builder().appName("SimpleApp").master("local[*]").getOrCreate();

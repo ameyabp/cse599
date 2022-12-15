@@ -59,7 +59,7 @@ public class DataRequestHandler implements HttpHandler {
             int end = dend.intValue();
             switch (params.get("lod").toString()) {
                 case "ocean":
-                    query = "SELECT ocean, COUNT(*) AS count, AVG(_lon) AS lon, AVG(_lat) AS lat, MAX(date)-MIN(date)+1 AS time_spent FROM whale_nodes";
+                    query = "SELECT ocean, COUNT(*) AS count, AVG(_lon) AS lon, AVG(_lat) AS lat, MAX(date)-MIN(date)+1 AS time_spent, MAX(expedition_nationality) AS nat FROM whale_nodes";
                     
                     if (!params.get("species").toString().equals("All")) {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
@@ -74,7 +74,7 @@ public class DataRequestHandler implements HttpHandler {
                     query += " GROUP BY ocean ORDER BY count ASC;";
                     break;
                 case "area":
-                    query = "SELECT area, COUNT(*) AS count, AVG(_lon) AS lon, AVG(_lat) AS lat, MAX(date)-MIN(date)+1 AS time_spent FROM whale_nodes";
+                    query = "SELECT area, COUNT(*) AS count, AVG(_lon) AS lon, AVG(_lat) AS lat, MAX(date)-MIN(date)+1 AS time_spent, MAX(expedition_nationality) AS nat FROM whale_nodes";
                     
                     if (!params.get("species").toString().equals("All")) {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
@@ -90,7 +90,7 @@ public class DataRequestHandler implements HttpHandler {
                     break;
                 case "grid":
                 case "heatmap":
-                    query = "SELECT COUNT(*) AS count, _lon::INT AS lon, _lat::INT AS lat, MAX(date)-MIN(date)+1 AS time_spent FROM whale_nodes";
+                    query = "SELECT COUNT(*) AS count, _lon::INT AS lon, _lat::INT AS lat, MAX(date)-MIN(date)+1 AS time_spent, MAX(expedition_nationality) AS nat FROM whale_nodes";
                     
                     if (!params.get("species").toString().equals("All")) {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
@@ -105,7 +105,7 @@ public class DataRequestHandler implements HttpHandler {
                     query += " GROUP BY lat, lon ORDER BY count ASC;";
                     break;
                 case "raw":
-                    query = "SELECT COUNT(*) AS count, _lon AS lon, _lat AS lat, MAX(date)-MIN(date)+1 AS time_spent FROM whale_nodes";
+                    query = "SELECT COUNT(*) AS count, _lon AS lon, _lat AS lat, MAX(date)-MIN(date)+1 AS time_spent, expedition_nationality AS nat FROM whale_nodes";
                     
                     if (!params.get("species").toString().equals("All")) {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
@@ -136,6 +136,7 @@ public class DataRequestHandler implements HttpHandler {
                         rowDict.put("lon", rs.getFloat(3));
                         rowDict.put("lat", rs.getFloat(4));
                         rowDict.put("time_spent", rs.getInt(5));
+                        rowDict.put("nationality", rs.getString(6));
                         break;
                     case "area":
                         rowDict.put("area", rs.getString(1));
@@ -143,12 +144,14 @@ public class DataRequestHandler implements HttpHandler {
                         rowDict.put("lon", rs.getFloat(3));
                         rowDict.put("lat", rs.getFloat(4));
                         rowDict.put("time_spent", rs.getInt(5));
+                        rowDict.put("nationality", rs.getString(6));
                         break;
                     default:
                         rowDict.put("count", rs.getInt(1));
                         rowDict.put("lon", rs.getFloat(2));
                         rowDict.put("lat", rs.getFloat(3));
                         rowDict.put("time_spent", rs.getInt(4));
+                        rowDict.put("nationality", rs.getString(5));
                         break;
                 }
 
