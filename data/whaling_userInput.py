@@ -49,59 +49,81 @@ if __name__ == '__main__':
 
     # format date-time in DD/MM/YYYY format
     # drop rows which have missing 'day' or 'month' values
+    rawRecords = 0
+    filteredRecords = 0
     ioDf.rename(columns={'Mon': 'Month'}, inplace=True)
+    rawRecords += len(ioDf)
     ioDf.drop(ioDf[(ioDf['Day'] == 0) | (ioDf['Month'] == 0)].index, inplace=True)
     ioDates = pd.to_datetime(ioDf[['Day', 'Month', 'Year']], dayfirst=True, format="%d/%m/%Y")
     ioDf['Date'] = ioDates
     ioDf.drop(columns=['Day', 'Month', 'Year'], inplace=True)
+    filteredRecords += len(ioDf)
     
     naDf.rename(columns={'Mon': 'Month'}, inplace=True)
+    rawRecords += len(naDf)
     naDf.drop(naDf[(naDf['Day'] == 0) | (naDf['Month'] == 0)].index, inplace=True)
     naDates = pd.to_datetime(naDf[['Day', 'Month', 'Year']], dayfirst=True, format="%d/%m/%Y")
     naDf['Date'] = naDates
     naDf.drop(columns=['Day', 'Month', 'Year'], inplace=True)
+    filteredRecords += len(naDf)
     
     saDf.rename(columns={'Mon': 'Month'}, inplace=True)
+    rawRecords += len(saDf)
     saDf.drop(saDf[(saDf['Day'] == 0) | (saDf['Month'] == 0)].index, inplace=True)
     saDates = pd.to_datetime(saDf[['Day', 'Month', 'Year']], dayfirst=True, format="%d/%m/%Y")
     saDf['Date'] = saDates
     saDf.drop(columns=['Day', 'Month', 'Year'], inplace=True)
+    filteredRecords += len(saDf)
     
     npDf.rename(columns={'Mon': 'Month'}, inplace=True)
+    rawRecords += len(npDf)
     npDf.drop(npDf[(npDf['Day'] == 0) | (npDf['Month'] == 0)].index, inplace=True)
     npDates = pd.to_datetime(npDf[['Day', 'Month', 'Year']], dayfirst=True, format="%d/%m/%Y")
     npDf['Date'] = npDates
     npDf.drop(columns=['Day', 'Month', 'Year'], inplace=True)
+    filteredRecords += len(npDf)
     
     spDf.rename(columns={'Mon': 'Month'}, inplace=True)
+    rawRecords += len(spDf)
     spDf.drop(spDf[(spDf['Day'] == 0) | (spDf['Month'] == 0)].index, inplace=True)
     spDates = pd.to_datetime(spDf[['Day', 'Month', 'Year']], dayfirst=True, format="%d/%m/%Y")
     spDf['Date'] = spDates
     spDf.drop(columns=['Day', 'Month', 'Year'], inplace=True)
+    filteredRecords += len(spDf)
     
     suDf.rename(columns={'Mon': 'Month'}, inplace=True)
+    rawRecords += len(suDf)
     suDf.drop(suDf[(suDf['Day'] == 0) | (suDf['Month'] == 0)].index, inplace=True)
     suDates = pd.to_datetime(suDf[['Day', 'Month', 'Year']], dayfirst=True, format="%d/%m/%Y")
     suDf['Date'] = suDates
     suDf.drop(columns=['Day', 'Month', 'Year'], inplace=True)
+    filteredRecords += len(suDf)
     
     shp1Df.rename(columns={'Mon': 'Month'}, inplace=True)
+    rawRecords += len(shp1Df)
     shp1Df.drop(shp1Df[(shp1Df['Day'] == 0) | (shp1Df['Month'] == 0)].index, inplace=True)
     shp1Dates = pd.to_datetime(shp1Df[['Day', 'Month', 'Year']], dayfirst=True, format="%d/%m/%Y")
     shp1Df['Date'] = shp1Dates
     shp1Df.drop(columns=['Day', 'Month', 'Year'], inplace=True)
+    filteredRecords += len(shp1Df)
     
     shp2Df.rename(columns={'Mon': 'Month'}, inplace=True)
+    rawRecords += len(shp2Df)
     shp2Df.drop(shp2Df[(shp2Df['Day'] == 0) | (shp2Df['Month'] == 0)].index, inplace=True)
     shp2Dates = pd.to_datetime(shp2Df[['Day', 'Month', 'Year']], dayfirst=True, format="%d/%m/%Y")
     shp2Df['Date'] = shp2Dates
     shp2Df.drop(columns=['Day', 'Month', 'Year'], inplace=True)
+    filteredRecords += len(shp2Df)
     
     shlDf.rename(columns={'Mon': 'Month'}, inplace=True)
+    rawRecords += len(shlDf)
     shlDf.drop(shlDf[(shlDf['Day'] == 0) | (shlDf['Month'] == 0)].index, inplace=True)
     shlDates = pd.to_datetime(shlDf[['Day', 'Month', 'Year']], dayfirst=True, format="%d/%m/%Y")
     shlDf['Date'] = shlDates
     shlDf.drop(columns=['Day', 'Month', 'Year'], inplace=True)
+    filteredRecords += len(shlDf)
+
+    print("Raw records:", rawRecords, " Filtered records:", filteredRecords, " % retained:", filteredRecords/rawRecords)
 
     # get individual dataframes from xlsx sheets
     # drop unrequired rows, set columns and reset numbering

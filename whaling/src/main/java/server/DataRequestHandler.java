@@ -105,7 +105,7 @@ public class DataRequestHandler implements HttpHandler {
                     query += " GROUP BY lat, lon ORDER BY count ASC;";
                     break;
                 case "raw":
-                    query = "SELECT COUNT(*) AS count, _lon AS lon, _lat AS lat, MAX(date)-MIN(date)+1 AS time_spent, expedition_nationality AS nat FROM whale_nodes";
+                    query = "SELECT COUNT(*) AS count, _lon AS lon, _lat AS lat, MAX(date)-MIN(date)+1 AS time_spent, MAX(expedition_nationality) AS nat FROM whale_nodes";
                     
                     if (!params.get("species").toString().equals("All")) {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
