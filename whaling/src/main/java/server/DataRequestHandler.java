@@ -65,10 +65,12 @@ public class DataRequestHandler implements HttpHandler {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
                     
                         if (begin != 1850 || end != 2020)
-                            query += " AND '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                            // query += " AND '[" + begin + "-01-01, " + end + "-12-31]'::daterange @> DATE";
+                            query += " AND date BETWEEN " + begin + " AND " + end;
                     }
                     else if (begin != 1850 || end != 2020) {
-                        query += " WHERE '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                        // query += " WHERE '[" + begin + "-01-01, " + end + "-12-31]'::daterange @> DATE";
+                        query += " WHERE date BETWEEN " + begin + " AND " + end;
                     }
 
                     query += " GROUP BY ocean ORDER BY count ASC;";
@@ -80,10 +82,12 @@ public class DataRequestHandler implements HttpHandler {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
                     
                         if (begin != 1850 || end != 2020)
-                            query += " AND '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                            // query += " AND '[" + begin + "-01-01, " + end + "-12-31]'::daterange @> DATE";
+                            query += " AND date BETWEEN " + begin + " AND " + end;
                     }
                     else if (begin != 1850 || end != 2020) {
-                        query += " WHERE '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                        // query += " WHERE '[" + begin + "-01-01, " + end + "-12-31]'::daterange @> DATE";
+                        query += " WHERE date BETWEEN " + begin + " AND " + end;
                     }
 
                     query += " GROUP BY area ORDER BY count ASC;";
@@ -96,10 +100,12 @@ public class DataRequestHandler implements HttpHandler {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
                     
                         if (begin != 1850 || end != 2020)
-                            query += " AND '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                            // query += " AND '[" + begin + "-01-01, " + end + "-12-31]'::daterange @> DATE";
+                            query += " AND date BETWEEN " + begin + " AND " + end;
                     }
                     else if (begin != 1850 || end != 2020) {
-                        query += " WHERE '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                        // query += " WHERE '[" + begin + "-01-01, " + end + "-12-31]'::daterange @> DATE";
+                        query += " WHERE date BETWEEN " + begin + " AND " + end;
                     }
                     
                     query += " GROUP BY lat, lon ORDER BY count ASC;";
@@ -111,10 +117,12 @@ public class DataRequestHandler implements HttpHandler {
                         query += " WHERE whale_species = '" + params.get("species").toString() + "'";
                     
                         if (begin != 1850 || end != 2020)
-                            query += " AND '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                            // query += " AND '[" + begin + "-01-01, " + end + "-12-31]'::daterange @> DATE";
+                            query += " AND date BETWEEN " + begin + " AND " + end;
                     }
                     else if (begin != 1850 || end != 2020) {
-                        query += " WHERE '[" + begin + "-01-01, " + end + "-01-01]'::daterange @> DATE";
+                        // query += " WHERE '[" + begin + "-01-01, " + end + "-12-31]'::daterange @> DATE";
+                        query += " WHERE date BETWEEN " + begin + " AND " + end;
                     }
 
                     query += " GROUP BY lat, lon ORDER BY count ASC;";

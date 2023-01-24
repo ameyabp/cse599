@@ -222,7 +222,7 @@ if __name__ == '__main__':
         # 'area_min_lon': [],
         'ocean': [],
         # 'season': [],
-        'year': [],
+        'date': [],
         'whale_species': [],
         'expedition_code': [],
         'expedition_nationality': [],
@@ -284,7 +284,7 @@ if __name__ == '__main__':
             nodes['expedition_type'].append(expeditionTypesDict[expeditionType] if expeditionType in expeditionTypesDict else 'NA')
             
             # nodes['season'].append(int(summaryRow['Year'].values[0]))
-            nodes['year'].append(row['Date'])
+            nodes['date'].append(row['Date'])
             nodes['whale_species'].append(whaleSpeciesDict[row['Sp']])
 
     print("Number of whale sightings across individual files:", nodeid)
@@ -298,38 +298,8 @@ if __name__ == '__main__':
     edgeid = 0
 
     # sort them wrt expedition code and date of sighting to get the chronological sequence for each expedition
-    nodesDf.sort_values(by=['expedition_code', 'year'])
+    nodesDf.sort_values(by=['expedition_code', 'date'])
 
     with open('graphNodesData.csv', 'w') as g:
         nodesDf.to_csv(path_or_buf=g, index=False, encoding='utf-8', date_format="%Y-%m-%d")
         g.close()
-
-    # create edges between each such consecutive pair of sightings for the same expedition, which are not at the same geo location
-    prevRow = nodesDf.iloc[[0]]
-    for idx, row in nodesDf.iterrows():
-        if row['expedition_code'] == prevRow['expedition_code'].values[0]:
-            if row['_lat'] != prevRow['_lat'].values[0] or row['_lon'] != prevRow['_lon'].values[0]:
-                edges['_edgeid'].append(edgeid)
-                edgeid += 1
-
-                # these will be directed edges
-                edges['_srcid'].append(prevRow['_nodeid'].values[0])
-                edges['_dstid'].append(row['_nodeid'])
-
-                edges['_weight'].append(1)
-
-                edges['expedition_code'].append(row['expedition_code'])
-                edges['expedition_nationality'].append(row['expedition_nationality'])
-                edges['owning_company'].append(row['owning_company'])
-                edges['expedition_type'].append(row['expedition_type'])
-
-        prevRow = nodesDf.iloc[[idx]]
-
-    edgesDf = pd.DataFrame(data=edges)
-
-    with open('graphEdgesData.csv', 'w') as g:
-        edgesDf.to_csv(path_or_buf=g, index=False, encoding='utf-8')
-        g.close()
-
-    print('Number of routes taken by expeditions overall:', edgeid)
-    print('Took', (time.clock_gettime(0) - start), ' sec')
